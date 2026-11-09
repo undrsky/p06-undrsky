@@ -276,7 +276,23 @@ class Engine(BaseEngine):
                     if pillow_features.check("libimagequant")
                     else None
                 )
+                # Keep the transparent pixels of a GIF transparent:
+                # quantize() drops the alpha channel, so mark one palette
+                # index that the transparent pixels use.
+                alpha_bytes = None
+                if (
+                    "A" in self.image.mode
+                    and (requested_extension or self.extension) == ".gif"
+                ):
+                    alpha_bytes = self.image.getchannel("A").tobytes()
+
                 self.image = self.image.quantize(method=quantize_method)
+
+                if alpha_bytes is not None and 0 in alpha_bytes:
+                    pos = alpha_bytes.index(0)
+                    self.image.info["transparency"] = self.image.tobytes()[
+                        pos
+                    ]
 
         ext = requested_extension or self.get_default_extension()
 
