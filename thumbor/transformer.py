@@ -284,8 +284,11 @@ class Transformer:
             > self.target_height / source_height
         ):
             crop_width = source_width
-            crop_height = int(
-                round(source_width * self.target_height / target_width, 0)
+            crop_height = max(
+                1,
+                int(
+                    round(source_width * self.target_height / target_width, 0)
+                ),
             )
         else:
             crop_width = int(
@@ -400,6 +403,9 @@ class Transformer:
             resize_width = round(
                 source_width * self.target_height / source_height + 1e-5
             )
+
+        resize_width = max(1, resize_width)
+        resize_height = max(1, resize_height)
 
         # ensure that filter should work on the real image size
         # and not on the request size which might be smaller than the
